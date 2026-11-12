@@ -1,9 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import {
   GraduationCap, Building2, UserCheck, Calendar, Clock, BookOpen, Users, Award,
-  Plus, Search, Info, Check, AlertCircle, CheckCircle2, User, UserPlus
+  Plus, Search, Info, Check, AlertCircle, CheckCircle2, User, UserPlus, Mail,
+  LockKeyhole, ArrowRight
 } from 'lucide-react';
 import { getAlunos, getTurmas, criarTurma, getMatriculasPorAluno, realizarMatricula } from './services/api';
+
+const CURSOS = [
+  'Administração',
+  'Direito',
+  'Medicina',
+  'Ciência da Computação',
+  'Engenharia Civil',
+];
 
 const DAYS_MAP = {
   '2': 'Segunda-feira',
@@ -19,7 +28,211 @@ const TURNS_MAP = {
   '3': 'Noite (19:00 - 22:30)'
 };
 
+function AuthScreen({ onLogin }) {
+  const [mode, setMode] = useState('login');
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [registration, setRegistration] = useState({ email: '', password: '', course: '' });
+  const [notice, setNotice] = useState('');
+
+  const handleLogin = (event) => {
+    event.preventDefault();
+    onLogin();
+  };
+
+  const handleRegistration = (event) => {
+    event.preventDefault();
+    setLoginEmail(registration.email);
+    setLoginPassword('');
+    setRegistration({ email: '', password: '', course: '' });
+    setNotice('Cadastro concluído! Entre com seu e-mail e senha.');
+    setMode('login');
+  };
+
+  const inputClassName = 'w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10';
+
+  return (
+    <main className="relative min-h-screen overflow-hidden bg-slate-950 px-4 py-8 sm:px-6 lg:px-8">
+      <div aria-hidden="true" className="pointer-events-none absolute -left-40 -top-40 h-96 w-96 rounded-full bg-indigo-600/20 blur-3xl" />
+      <div aria-hidden="true" className="pointer-events-none absolute -bottom-48 -right-32 h-[32rem] w-[32rem] rounded-full bg-blue-500/10 blur-3xl" />
+
+      <div className="relative mx-auto grid min-h-[calc(100vh-4rem)] w-full max-w-6xl items-center gap-10 lg:grid-cols-2 lg:gap-16">
+        <section className="hidden text-white lg:block">
+          <div className="mb-10 inline-flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-indigo-600 to-blue-500 shadow-lg shadow-indigo-950/40">
+              <GraduationCap className="h-7 w-7" />
+            </div>
+            <span className="text-sm font-semibold tracking-wide text-indigo-100">PORTAL ACADÊMICO</span>
+          </div>
+          <p className="mb-4 text-sm font-semibold uppercase tracking-[0.2em] text-indigo-300">
+            Sistema de Atendimento e Matrículas
+          </p>
+          <h1 className="max-w-xl text-4xl font-bold leading-tight tracking-tight xl:text-5xl">
+            Sua jornada acadêmica começa aqui.
+          </h1>
+          <p className="mt-6 max-w-lg text-base leading-relaxed text-slate-300">
+            Acesse as ofertas de turmas e organize suas matrículas em um só lugar.
+          </p>
+          <div className="mt-10 flex items-center gap-3 text-sm text-slate-300">
+            <BookOpen className="h-5 w-5 text-indigo-300" />
+            <span>Um portal simples para acompanhar sua vida universitária.</span>
+          </div>
+        </section>
+
+        <section className="mx-auto w-full max-w-md rounded-3xl border border-white/60 bg-white p-7 shadow-2xl shadow-black/30 sm:p-9">
+          <div className="mb-8 text-center lg:text-left">
+            <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 lg:hidden">
+              <GraduationCap className="h-7 w-7" />
+            </div>
+            <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-indigo-600">
+              Portal Acadêmico
+            </p>
+            <h2 className="text-2xl font-bold tracking-tight text-slate-900">
+              {mode === 'login' ? 'Bem-vindo de volta' : 'Crie sua conta'}
+            </h2>
+            <p className="mt-2 text-sm text-slate-500">
+              {mode === 'login'
+                ? 'Entre para acessar o sistema de matrículas.'
+                : 'Preencha seus dados para começar.'}
+            </p>
+          </div>
+
+          {notice && mode === 'login' && (
+            <div role="status" className="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+              {notice}
+            </div>
+          )}
+
+          {mode === 'login' ? (
+            <form onSubmit={handleLogin} className="space-y-5">
+              <div>
+                <label htmlFor="login-email" className="mb-2 block text-sm font-semibold text-slate-700">E-mail</label>
+                <div className="relative">
+                  <Mail aria-hidden="true" className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <input
+                    id="login-email"
+                    type="email"
+                    required
+                    autoComplete="email"
+                    placeholder="voce@exemplo.com"
+                    value={loginEmail}
+                    onChange={(event) => setLoginEmail(event.target.value)}
+                    className={`${inputClassName} pl-10`}
+                  />
+                </div>
+              </div>
+              <div>
+                <label htmlFor="login-password" className="mb-2 block text-sm font-semibold text-slate-700">Senha</label>
+                <div className="relative">
+                  <LockKeyhole aria-hidden="true" className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <input
+                    id="login-password"
+                    type="password"
+                    required
+                    minLength={6}
+                    autoComplete="current-password"
+                    placeholder="Mínimo de 6 caracteres"
+                    value={loginPassword}
+                    onChange={(event) => setLoginPassword(event.target.value)}
+                    className={`${inputClassName} pl-10`}
+                  />
+                </div>
+              </div>
+              <button
+                type="submit"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 transition hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/25"
+              >
+                Entrar <ArrowRight className="h-4 w-4" />
+              </button>
+              <p className="pt-1 text-center text-sm text-slate-500">
+                Ainda não tem uma conta?{' '}
+                <button
+                  type="button"
+                  onClick={() => { setNotice(''); setMode('register'); }}
+                  className="font-semibold text-indigo-600 hover:text-indigo-700"
+                >
+                  Cadastre-se
+                </button>
+              </p>
+            </form>
+          ) : (
+            <form onSubmit={handleRegistration} className="space-y-5">
+              <div>
+                <label htmlFor="register-email" className="mb-2 block text-sm font-semibold text-slate-700">E-mail</label>
+                <div className="relative">
+                  <Mail aria-hidden="true" className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <input
+                    id="register-email"
+                    type="email"
+                    required
+                    autoComplete="email"
+                    placeholder="voce@exemplo.com"
+                    value={registration.email}
+                    onChange={(event) => setRegistration({ ...registration, email: event.target.value })}
+                    className={`${inputClassName} pl-10`}
+                  />
+                </div>
+              </div>
+              <div>
+                <label htmlFor="register-password" className="mb-2 block text-sm font-semibold text-slate-700">Senha</label>
+                <div className="relative">
+                  <LockKeyhole aria-hidden="true" className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <input
+                    id="register-password"
+                    type="password"
+                    required
+                    minLength={6}
+                    autoComplete="new-password"
+                    placeholder="Mínimo de 6 caracteres"
+                    value={registration.password}
+                    onChange={(event) => setRegistration({ ...registration, password: event.target.value })}
+                    className={`${inputClassName} pl-10`}
+                  />
+                </div>
+              </div>
+              <div>
+                <label htmlFor="register-course" className="mb-2 block text-sm font-semibold text-slate-700">Curso</label>
+                <select
+                  id="register-course"
+                  required
+                  value={registration.course}
+                  onChange={(event) => setRegistration({ ...registration, course: event.target.value })}
+                  className={inputClassName}
+                >
+                  <option value="" disabled>Selecione seu curso</option>
+                  {CURSOS.map((course) => <option key={course} value={course}>{course}</option>)}
+                </select>
+              </div>
+              <button
+                type="submit"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 transition hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/25"
+              >
+                Criar conta <ArrowRight className="h-4 w-4" />
+              </button>
+              <p className="pt-1 text-center text-sm text-slate-500">
+                Já tem uma conta?{' '}
+                <button
+                  type="button"
+                  onClick={() => setMode('login')}
+                  className="font-semibold text-indigo-600 hover:text-indigo-700"
+                >
+                  Voltar para o login
+                </button>
+              </p>
+            </form>
+          )}
+
+          <p className="mt-8 border-t border-slate-100 pt-5 text-center text-xs text-slate-400">
+            Sistema de Atendimento e Matrículas
+          </p>
+        </section>
+      </div>
+    </main>
+  );
+}
+
 export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [role, setRole] = useState('GESTOR');
   const [gestorTab, setGestorTab] = useState('ofertas'); 
   const [alunoTab, setAlunoTab] = useState('matricula');
@@ -79,9 +292,10 @@ export default function App() {
     }
   };
 
-  useEffect(() => {
+  const handleLogin = () => {
+    setIsAuthenticated(true);
     inicializarDados();
-  }, []);
+  };
 
   useEffect(() => {
     carregarMatriculasDoAluno();
@@ -147,6 +361,10 @@ export default function App() {
   };
 
   const turmasMatriculadasIds = matriculas.map(m => m.turma.id);
+
+  if (!isAuthenticated) {
+    return <AuthScreen onLogin={handleLogin} />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col antialiased text-slate-800">
